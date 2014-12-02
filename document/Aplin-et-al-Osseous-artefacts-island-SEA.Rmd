@@ -1,0 +1,1267 @@
+---
+title: "Supplementary information for Aplin et al. Osseous Artefacts in Island Southeast Asia"
+output:
+  html_document
+---
+
+Here I have attempted to reproduce all the figures and statistics from the manuscript. I've redrawn the figures in a more B&W-safe layout also, though I think the colour ones are easier to read (and better than the grey-scale ones in the ms that are hard to match the patterns with the legend)
+
+I have pasted in sections of the text that contain statistics, updated the statistics and edited the text where the updated values changed the meaning. 
+
+I have also added comments where my results differ from those in the manuscript.
+
+In general, most of my results are slightly different from those in the ms, but this only alters the interpretation in just a few places. 
+
+I think the reason for the differences is because the data used for each table and figure is subset from the entire dataset in a way that is not clear and perhaps not consistent. If I can get some more information about how the data are selected for each table and figure I can probably reproduce them exactly. The ways the data are subset are worth clarifying in the ms. because if I can't reproduce the results it means that a reviewer may also struggle to make sense of how the data are being analysed. 
+
+The biggest problem is the category of 'uni- and bi- points' which appear frequently in the tables and figures, but have no obvious corresponding variable or code in the data. I've had a few guesses here, but it's really a mystery as to how this category is defined. A reviewer will probably have the same reaction. 
+
+```{r, find-dir, message=FALSE, echo=FALSE}
+# This is necessary to direct knitr to find the 
+# 'code', 'data', and other directories that contain
+# files needed to execute this document
+library(knitr)
+opts_knit$set(root.dir=normalizePath('../'))
+opts_chunk$set(message = FALSE, echo = FALSE, fig.align='center')
+# font size for plots
+base_size <- 16
+# prioritise dplyr's functions over others
+filter <- dplyr::filter
+select <- dplyr::select
+```
+
+
+```{r load-data-and-libraries}
+bone_data <- read.csv("data/bone_artefact_data.csv", stringsAsFactors = FALSE)
+source("code/libraries.r")
+# recode a few things for better plotting
+bone_data$Morphotype <-  with(bone_data, 
+                              ifelse(Morphtype == 'B', "bipoint",
+                              ifelse(Morphtype == 'E', "expedient",
+                              ifelse(Morphtype == 'F', "fragment",
+                              ifelse(Morphtype == 'G', "ground piece", 
+                              ifelse(Morphtype == 'S', "shaft fragment", 
+                              ifelse(Morphtype == 'Sp', "spatula", 
+                              ifelse(Morphtype == 'T', "point tip",
+                              ifelse(Morphtype == 'U', "unipoint", 
+                              ifelse(Morphtype == 'I', "indeterminate", "no_data"))))))))))
+
+
+bone_data$`Raw Material` <-  with(bone_data, 
+                              ifelse(Raw.Mat. == 'C', "cortex",
+                              ifelse(Raw.Mat. == 'D', "dentine",
+                              ifelse(Raw.Mat. == 'S', "shaft",
+                              ifelse(Raw.Mat. == 'E', "enamel",
+                                     "no_data")))))
+
+bone_data$Burning <-      with(bone_data, 
+                              ifelse(Burning.Overall  == 'U', "unburnt",
+                              ifelse(Burning.Overall  == 'B', "burnt",
+                              ifelse(Burning.Overall  == 'C', "calcined",
+                                     "no_data"))))
+
+ 
+                                                                                                                                                      
+```
+
+
+```{r raw-materials}
+cortex <- filter(bone_data, Raw.Mat. == "C")
+dentin <- filter(bone_data, Raw.Mat. == "D")
+shaft <-  filter(bone_data, Raw.Mat. == "S")
+# percentages
+cortex_perc <- nrow(cortex)/nrow(bone_data) * 100
+dentin_perc <- nrow(dentin)/nrow(bone_data) * 100
+shaft_perc <-  nrow(shaft)/nrow(bone_data) * 100
+# count
+point_or_fragment_of_point <- filter(bone_data, Morphtype %in% c("U", "P", "F"))
+```
+
+The combined sample of `r nrow(bone_data)` osseous artefacts from the Walandawe region is morphologically diverse, being variably made on bones and teeth derived from a number of different vertebrate taxa, and displaying a wide range of sizes and shapes. It also exhibits number of distinctly different kinds of use-related damage and wear.
+
+A total of `r nrow(point_or_fragment_of_point)` artefacts are classified as points or fragments of points. Included within this category are artefacts that are relatively slender and elongate, terminate in one or more sharp ends (where ends are preserved), and are potentially penetrative in function. Points in this broad sense were recovered from contexts representing all phases of the regional sequence, while clearly bi-pointed examples were recovered from all but the most recent (Phase A) levels.
+
+Unlike some other regional collections (e.g. Kria Cave, West Papua; Pasveer 2004) where there is a more-or-less complete segregation in raw material selection between bipoints (typically made on slivers of cortical bone) and unipoints (typically made from the shafts of elongate, narrow bones), the South East Sulawesi points show no such simple segregation, with the great majority (`r sprintf("%.1f", cortex_perc)`%) of all kinds made from cortex bone slivers, and a smaller proportion made from tooth roots (`r sprintf("%.1f", dentin_perc)`%; including both bipointed and unipointed forms) or shaft bones (`r sprintf("%.1f", shaft_perc)`%; unipointed forms only).
+
+```{r ei-values}
+complete_bipoints <- filter(bone_data, Morphtype == "B", Bipoint.completeness == "C")
+ei <- with(complete_bipoints, Length/((Max..Width * Max..Depth)/2) )
+ei_ <- with(complete_bipoints, Length/Max..Width )
+
+complete_bipoints_one_tip <- filter(bone_data, Morphtype == "B", Bipoint.completeness %in% c("C", "1"))
+# index in ms. (unusual)
+ei_one_tip <- with(complete_bipoints_one_tip, Length/((Max..Width * Max..Depth)/2) )
+# my index (used in the text here, better match with ms. figures anyway)
+ei_one_tip_ <- with(complete_bipoints_one_tip, Length/Max..Width )
+```
+
+To exploit this likelihood, we calculated an ‘elongation index’ (EI) for each point, under the formula L/((WxT)/2) – the ratio of point length to its average width/thickness. EI values for the sample of 11 complete bipoints fall in the range `r sprintf("%.1f", min(ei_))` - `r sprintf("%.1f", max(ei_))`, with a mean value of `r sprintf("%.1f", mean(ei_))`; while the values for bipoints lacking one tip are `r sprintf("%.1f", min(ei_one_tip_))` - `r sprintf("%.1f", max(ei_one_tip_))` (N = `r length(ei_one_tip_)`), with a mean value of `r sprintf("%.1f", mean(ei_one_tip_))`.
+
+Since most of the bipoints are essentially symmetrical (see below), single pointed artefacts with EI values in excess of `r sprintf("%.1f", min(ei_))` are thus unlikely to be fragments of bipoints.
+
+```{r redefine-ei}
+bone_data$ei <- with(bone_data, Length/((Max..Width * Max..Depth)/2) )
+bone_data$ei_ <- with(bone_data, Length/Max..Width )
+unipoints <- filter(bone_data, Morphtype == "U", Raw.Mat. == "C", ei < 5)
+bipoints <- filter(bone_data, Morphtype == "B")
+```
+
+Using these criteria, a sample of `r nrow(unipoints)` attenuate unipoints are identified (Figure 6), 22 of which show clear use-related wear or damage. 
+
+Cortex slivers were selected in `r sprintf("%.1f", cortex_perc)`% of cases, followed by dentin (`r sprintf("%.1f", dentin_perc)`%) and shaft bones (`r sprintf("%.1f", shaft_perc)`%). The dominance of cortex bone slivers over tooth dentin is preserved throughout the chronological sequence 
+
+
+Table 2. Raw material use through the five-phase chronological sequence.
+
+Comment: 
+
+* my counts are slightly higher, but the basic pattern is the same. 
+
+```{r table-two}
+
+table_two <- summarise(group_by(bone_data, PHASE, `Raw Material`), count = length(`Raw Material`))
+recast(table_two,  `Raw Material` ~  PHASE, sum, margins = TRUE)
+# close...
+```
+
+Table 3. Usage of the major osseous raw materials in the manufacture of various classes of points, tabulated by chronological phase.
+
+Comment: 
+
+* my counts are slightly different, but the basic pattern is the same. 
+
+```{r table-three}
+
+table_three <- bone_data %>%
+  filter(Morphtype %in% c("B", "S", "T", "U")) %>%
+  group_by( PHASE, `Raw Material`, Morphotype) %>%
+  summarise(count =  length(`Raw Material`))
+recast(table_three, Morphotype + `Raw Material` ~  PHASE, sum, margins = TRUE)
+# quite different in a few spots
+
+```
+
+Table 3 shows the pattern of usage of different osseous raw materials for manufacture of bipoints vs unipoints through the chronological sequence. Aside from the overrepresentation of bipoints in the relative small sample from Phase C (n = `r sum(table_three[table_three$PHASE == "C",]$count)` ), and the absence of bipoints in Phase A (n = `r sum(table_three[table_three$PHASE == "A",]$count)`), there is little evidence of change through time.
+
+Table 4. Burning state of raw materials, group by raw material type and by chronological phase. 
+
+Comment:
+
+* my counts are slightly different, but the basic pattern is the same. 
+
+```{r table-four}
+# burning by raw material
+table_four_a <- bone_data %>%
+  group_by( Burning, `Raw Material`) %>%
+  summarise(count =  length(`Raw Material`))
+recast(table_four_a, `Raw Material` ~ Burning, sum, margins = TRUE)
+
+# burning by phase
+table_four_b <- bone_data %>%
+  group_by(Burning, PHASE) %>%
+  summarise(count =  as.numeric(length(PHASE)))
+table_four_b_recast <- recast(table_four_b, PHASE ~ Burning, sum, margins = TRUE)
+
+# proportion burnt in each phase
+table_four_b_recast_props <- round(prop.table(as.matrix(table_four_b_recast[-nrow(table_four_b_recast),c(-1, -ncol(table_four_b_recast))]), 2),3)
+data.frame(Phase = unique(bone_data$PHASE), table_four_b_recast_props)
+      
+# perc calcined
+perc_calcined <-  nrow(filter(bone_data, Burning == 'calcined'))/nrow(bone_data) * 100
+```
+
+Almost half of the points (are burnt to some degree (Table 4 upper panel), though only a small proportion (`r  sprintf("%.1f", perc_calcined)`%) is burnt to the level of calcination. The proportions in each burning class are essentially the same for each raw material type (Table 4 lower panel)
+
+
+Figure 8. Variation in cross-sectional dimensions among dentin points. The sole outlier is the tip of a possible dog tooth artefact.
+
+```{r figure-eight}
+# subset data
+cross_section <- filter(bone_data, Raw.Mat. == "D", Morphtype %in% c("B", "U", "T", "S"))
+
+# draw plot
+ggplot(cross_section, aes(Max..Width,  Max..Depth, colour = Morphotype)) +
+  geom_point(size = 3, aes(shape = Morphotype)) +
+  theme_minimal(base_size = base_size) +
+  ggtitle("Cross section variation in Dentin points") +
+  xlab("Width (mm)") +
+  ylab("Thickness (mm)") 
+```
+
+Figure 9. Relationship between tip length and shaft width in three categories of dentin points.
+
+Comment: 
+
+* I seem to have more samples in my data, but with a smaller range of values. Doesn't change the interpretation of weak correlations.
+
+
+```{r figure-nine}
+# subset data
+tip_len_wdt_dentin <- filter(bone_data, Raw.Mat. == "D", Morphtype %in% c("B", "U"))
+
+# draw plot
+ggplot(tip_len_wdt_dentin, aes(Tip.Length, Max..Width, colour = Morphotype)) +
+  geom_point(size = 4, aes(shape = Morphotype)) +
+  theme_minimal(base_size = base_size) +
+  ggtitle("Tip length by width in dentin points") +
+  ylab("Width (mm)") +
+  xlab("Tip Length (mm)") 
+```
+
+
+
+```{r cortex}
+
+# basic linear model
+ggplot(cortex, aes(Max..Width,  Max..Depth)) +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm") + 
+  theme_minimal(base_size = base_size) +
+  ggtitle("Cortex points: Width/Thickness") +
+  xlab("Width (mm)") +
+  ylab("Thickness (mm)") 
+
+cortex_wth_thk <- summary(lm(Max..Width ~ Max..Depth, data = cortex))
+
+```
+
+Points made from cortex slivers are much more variable than those made from dentin. There is moderately strong linear association (R2 = `r sprintf("%.2f",
+cortex_wth_thk$adj.r.squared)`, p = `r sprintf("%.3f", cortex_wth_thk$coef[8])`); Figure 10; Table 5) between width and thickness and an overall tendency to become more flattened in cross-sectional shape with increasing width. 
+
+
+```{r correlations-in-text}
+cortex_bipoints <- filter(cortex, Morphtype == "B")
+# basic linear model
+# compute summary
+cortex_bipoint_wth_thk <- summary(lm(Max..Width ~ Max..Depth, data = cortex_bipoints))
+
+cortex_attenuate_unipoint <- filter(cortex, Morphtype == "U")
+# basic linear model
+cortex_attenuate_unipoint_wth_thk <- summary(lm(Max..Width ~ Max..Depth, data = cortex_attenuate_unipoint))
+
+# all cortex points
+cortex_wth_len <- summary(lm(Max..Width ~ Tip.Length, data = cortex))
+# cortex bipoints
+cortex_bipoints_wth_len <- summary(lm(Max..Width ~ Tip.Length, data = cortex_bipoints ))
+
+# cortex bipoints exclude outlier
+cortex_bipoints_no_outlier <- filter(cortex_bipoints, Tip.Length < 21)
+# how many excluded?
+cortex_bipoints_na <- cortex_bipoints[!is.na(cortex_bipoints$Tip.Length),]
+count_excluded <- nrow(cortex_bipoints_na) - nrow(cortex_bipoints_no_outlier) 
+cortex_bipoints_no_outlier_wth_len <- summary(lm(Max..Width ~ Tip.Length, data = cortex_bipoints_no_outlier))
+
+# unipoints: tip length by width
+cortex_attenuate_unipoint_na <- cortex_attenuate_unipoint[!is.na(cortex_attenuate_unipoint$Tip.Length),]
+cortex_attenuate_unipoint_na_wth_len <- summary(lm(Max..Width ~ Tip.Length, data = cortex_attenuate_unipoint_na))
+
+# plot uniplots and cortex biplots
+uniplots_cortex_bipoints <- rbind(cortex_bipoints_no_outlier, cortex_attenuate_unipoint_na )
+
+```
+
+The association is stronger for each of the individual bipoint (R2 = `r sprintf("%.2f", cortex_bipoint_wth_thk$adj.r.squared)`, p = `r sprintf("%.3f", cortex_bipoint_wth_thk$coef[8])`) and attenuate unipoint (R2 = `r sprintf("%.2f", cortex_attenuate_unipoint_wth_thk$adj.r.squared)`, p = `r sprintf("%.3f", cortex_attenuate_unipoint_wth_thk$coef[8])`) categories, and there is a contrast in regression slope between two major point categories, with a stronger tendency toward flattening with increasing width among bipoints than among attenuate unipoints. These differences reinforce the notion that the two major point categories are discrete in terms of both design and function.
+
+
+Point length of cortex points shows a weak overall relationship (R2 =  `r sprintf("%.2f", cortex_wth_len$adj.r.squared)`, p = `r sprintf("%.3f", cortex_wth_len$coef[8])`) with shaft width (Figure 11; Table 5). For bipoints alone the relationship is strong (R2 = `r sprintf("%.2f", cortex_bipoints_wth_len$adj.r.squared)`, p = `r sprintf("%.3f",  cortex_bipoints_wth_len$coef[8])`) and this remains true even when `r count_excluded` outlier points with point lengths > 21 mm are excluded from the calculation (R2 = `r sprintf("%.2f", cortex_bipoints_no_outlier_wth_len$adj.r.squared)`, p =  `r sprintf("%.3f",  cortex_bipoints_no_outlier_wth_len$coef[8])`). By contrast, the sample of attenuate unipoints (n = `r nrow(cortex_attenuate_unipoint_na)`) shows only a weak relationship (R2 = `r sprintf("%.2f", cortex_attenuate_unipoint_na_wth_len$adj.r.squared)`, p = `r sprintf("%.3f", cortex_attenuate_unipoint_na_wth_len$coef[8])`) between shaft width and point length. Again, this reinforces the notion that bipoints and attenuate unipoints are genuinely discrete categories of tools. However, the poor relationship of primary point length and shaft width among the attenuate unipoint category raises questions over the unity of this group of artefacts.
+
+
+Figure 10. Variation in cross-sectional dimensions in cortex points. Regression trend-lines are shown for each of bipoints and attenuate unipoints (see Table 5 for associated statistics).
+
+Comment: 
+
+* Mine looks quite diferent, with the regression lines not crossing like they do in the ms. Also it is not clear from the data sheet what a "uni- or bi' point" is.
+
+```{r figure-ten}
+bipoint_unipoint <- filter(cortex, Morphtype == c("B", "U"))
+ggplot(bipoint_unipoint, aes(Max..Width, Max..Depth, colour = Morphotype)) +
+  geom_point(size = 4, aes(shape = Morphotype)) +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_minimal(base_size = base_size) +
+  ggtitle("Bipoints and Unipoints: Width/Thickness") +
+  xlab("Width (mm)") +
+  ylab("Thickness (mm)")
+
+```
+
+
+
+Table 5. Linear regression statistics for cortex points.
+
+Comment: 
+
+* what exactly are 'uni- or bi-points'? Are the shaft frags and point tips? Don't seem to be, as I've tried that as the results are still quite different.
+
+* The r-squared values are pretty much the same
+
+* the intercept and slope values are very close (not that standard presentation of linear models is a + bx, which is not what's in the ms.)
+
+* the p-values suggest that the observed regressions are not due to chance, _except_ for the 'uni- or bi-point' category
+
+First is WxTh (all points appear below the table)
+
+```{r table-five-a}
+table_five <- with(cortex, data.frame(Morphotype, Max..Width, Max..Depth ))
+table_five <- filter(table_five, Morphotype %in% c("unipoint", "bipoint", "shaft fragment", "point tip"))
+# function to extract a, b, r2, and p values
+lm_eqn = function(df){
+    m = lm(Max..Depth ~ Max..Width, df);
+      out <-data.frame(a = format(coef(m)[1], digits = 2), 
+                       b = format(coef(m)[2], digits = 2), 
+                      r2 = format(summary(m)$r.squared, digits = 3),
+                       p =  format(anova(m)$'Pr(>F)'[1], digits = 3),
+                       n = nrow(df) )
+    out                 
+}
+# compute linear models
+models_x <- plyr::dlply(table_five, "Morphotype", function(i) 
+     lm_eqn(i))
+# present in tidy data frame
+do.call("rbind", models_x)
+
+# recomput, combining shaft frag and point tip to uni or bipoint
+# and combing uni and bi to get all poitns
+table_five$Morphotype <-  ifelse(table_five$Morphotype == "shaft fragment" | table_five$Morphotype == "point tip", "uni_or_bi_point", as.character(table_five$Morphotype))
+
+# compute linear models
+models_x <- plyr::dlply(table_five, "Morphotype", function(i) 
+     lm_eqn(i))
+# present in tidy data frame
+do.call("rbind", models_x)
+
+# allpoints
+cat("all points")
+lm_eqn(table_five)
+```
+
+
+Next is LxW, I'm assuming tip length is being used rather than total length
+
+```{r table-five-b}
+table_five_b <- with(cortex, data.frame(Morphotype, Max..Width, Tip.Length))
+table_five_b <- filter(table_five_b, Morphotype %in% c("unipoint", "bipoint", "shaft fragment", "point tip"))
+# function to extract a, b, r2, and p values
+lm_eqn = function(df){
+    m = lm(Tip.Length   ~ Max..Width , df);
+      out <-data.frame(a = format(coef(m)[1], digits = 2), 
+                       b = format(coef(m)[2], digits = 2), 
+                      r2 = format(summary(m)$r.squared, digits = 3),
+                       p =  format(anova(m)$'Pr(>F)'[1], digits = 3),
+                       n = nrow(df) )
+    out                 
+}
+
+
+# recomput, combining shaft frag and point tip to uni or bipoint
+table_five_b$Morphotype <-  ifelse(table_five_b$Morphotype == "shaft fragment" | table_five_b$Morphotype == "point tip", "uni_or_bi_point", as.character(table_five_b$Morphotype))
+
+# compute linear models
+models_x <- plyr::dlply(table_five_b, "Morphotype", function(i) 
+     lm_eqn(i))
+# present in tidy data frame
+do.call("rbind", models_x)
+# allpoints
+message("all points")
+lm_eqn(table_five_b)
+
+```
+
+
+Figure 11. Variation in shaft width and point length in cortex points. Regression trend-lines are shown for each of bipoints and attenuate unipoints (see Table 8 for associated statistics).
+
+```{r figure-eleven}
+
+
+
+# draw plot
+ggplot(uniplots_cortex_bipoints, aes(Max..Width, Tip.Length, colour = Morphotype)) +
+  geom_point(size = 4, aes(shape = Morphotype)) +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_minimal(base_size = base_size) +
+  ggtitle("Cortex bipoints & unipoints: Width to Tip length") +
+  xlab("Width (mm)") +
+  ylab("Tip length (mm)") 
+
+# are the regression line slopes different?
+m1 <- aov( Max..Width ~ Tip.Length * Morphotype, data = uniplots_cortex_bipoints)
+m2 <- aov( Max..Width ~ Tip.Length + Morphotype, data = uniplots_cortex_bipoints)
+pval_slopes <- anova(m1, m2)$`Pr(>F)`[2]
+# we fail to reject the null hypothesis of equal slopes in these data
+
+```
+
+
+Figure 12. Comparison of cross-sectional proportions of bipoints made from contrasting raw materials.
+
+
+```{r figure-twelve}
+ggplot(bipoints, aes(Max..Width, Max..Depth, colour = `Raw Material`)) +
+  geom_point(size = 4, aes(shape = `Raw Material`)) +
+  theme_minimal(base_size = base_size) +
+  ggtitle("Bipoint raw materials: Width/Thickness") +
+  xlab("Width (mm)") +
+  ylab("Thickness (mm)")
+```
+
+Figure 13. Comparison of cross-sectional proportions of the combined sample of attenuate unipoints and uni-/bi-points made from contrasting raw materials.
+
+
+```{r figure-thirteen}
+unipoints_all_rawmaterials <- filter(bone_data, Morphtype == "U")
+ggplot(unipoints_all_rawmaterials, aes(Max..Width, Max..Depth, colour = `Raw Material`)) +
+  geom_point(size = 4, aes(shape = `Raw Material`)) +
+  theme_minimal(base_size = base_size) +
+  ggtitle("Unipoint raw materials: Width/Thickness") +
+  xlab("Width (mm)") +
+  ylab("Thickness (mm)")
+
+```
+
+Figure 14. Variation in cross-sectional dimensions of cortex bipoints through the chronological sequence.
+
+```{r figure-fourteen}
+ggplot(cortex_bipoints, aes(Max..Width, Max..Depth, colour = PHASE)) +
+  geom_point(size = 4, aes(shape = PHASE)) +
+  theme_minimal(base_size = base_size) +
+  ggtitle("Bipoints by phase: Width/Thickness") +
+  xlab("Width (mm)") +
+  ylab("Thickness (mm)")
+```
+
+
+Figure 15. Variation through the chronological sequence in cross-sectional dimensions of attenuate unipoints made on cortex slivers.
+
+```{r figure-fifteen}
+cortex_unipoints <- filter(bone_data, Raw.Mat. == "C", Morphtype == "U")
+ggplot(cortex_unipoints, aes(Max..Width, Max..Depth, colour = PHASE)) +
+  geom_point(size = 4, aes(shape = PHASE)) +
+  theme_minimal(base_size = base_size) +
+  ggtitle("Unipoints by phase: Width/Thickness") +
+  xlab("Width (mm)") +
+  ylab("Thickness (mm)")
+```
+
+Figure 16. Variation through the chronological sequence in cross-sectional dimensions of the combined sample of attenuate unipoints and uncertain uni-/bi-points made on cortex slivers.
+
+```{r figure_sixteen}
+cortex_unipoints_uncertain <- cortex_unipoints <- filter(bone_data, Raw.Mat. == "C", Morphtype %in% c("U", "S"))
+ggplot(cortex_unipoints_uncertain, aes(Max..Width, Max..Depth, colour = PHASE)) +
+  geom_point(size = 4, aes(shape = PHASE)) +
+  theme_minimal(base_size = base_size) +
+  ggtitle("Unipoints & uncertains by phase: Width/Thickness") +
+  xlab("Width (mm)") +
+  ylab("Thickness (mm)")
+```
+
+
+Table 6. Metric attributes in major categories of points through the chronological sequence.
+
+Comment:
+
+* It's a complete mystery what the rows of the table in the ms. are meant to be. Presumably something like mean, range and standard deviation, but the labels are missing, so it's not clear.
+
+* the claim that 'a decrease in variability between the samples from Phase E contexts and those from all younger time intervals' is not well supported. 
+
+* sample sizes are much too small to make robust claims about directional change, I'd suggest dropping these claims about change over time
+
+Here are bipoints
+
+```{r table-six-a}
+
+# bipoints
+table_six_a <- bipoints %>%
+  group_by(PHASE) %>%
+  summarise(`mean length` =  mean(Length),
+            `mean width` =  mean(Max..Width),
+            `mean thickness` =  mean(Max..Depth),
+            `mean tip length` =  mean(Tip.Length),
+             count = length(Length))
+rownames(table_six_a) <- as.character(table_six_a[, 1])
+table_six_a <- table_six_a[,-1]
+table_six_a <- data.frame(t(table_six_a))
+apply(table_six_a, 2, round, 1)
+
+table_six_aa <- bipoints %>%
+  group_by(PHASE) %>%
+  summarise(`sd length` =  sd(Length, na.rm = TRUE),
+            `sd width` =  sd(Max..Width, na.rm = TRUE),
+            `sd thickness` =  sd(Max..Depth, na.rm = TRUE),
+            `sd tip length` =  sd(Tip.Length, na.rm = TRUE),
+             count = length(Length)
+            )
+rownames(table_six_aa) <- as.character(table_six_aa[, 1])
+table_six_aa <- table_six_aa[,-1]
+table_six_aa <- data.frame(t(table_six_aa))
+apply(table_six_aa, 2, round, 1)
+```
+
+Here are unipoints
+
+```{r table-six-b}
+# unipoints
+table_six_b <- unipoints_all_rawmaterials %>%
+  group_by(PHASE) %>%
+  summarise(`mean length` =  mean(Length),
+            `mean width` =  mean(Max..Width),
+            `mean thickness` =  mean(Max..Depth),
+            `mean tip length` =  mean(Tip.Length), 
+             count = length(Length)
+            )
+rownames(table_six_b) <- as.character(table_six_b[, 1])
+table_six_b <- table_six_b[,-1]
+table_six_b <- data.frame(t(table_six_b))
+apply(table_six_b, 2, round, 1)
+
+table_six_ba <- unipoints_all_rawmaterials %>%
+  group_by(PHASE) %>%
+  summarise(`sd length` =  sd(Length, na.rm = TRUE),
+            `sd width` =  sd(Max..Width, na.rm = TRUE),
+            `sd thickness` =  sd(Max..Depth, na.rm = TRUE),
+            `sd tip length` =  sd(Tip.Length, na.rm = TRUE), 
+             count = length(Length)
+            )
+rownames(table_six_ba) <- as.character(table_six_ba[, 1])
+table_six_ba <- table_six_ba[,-1]
+table_six_ba <- data.frame(t(table_six_ba))
+apply(table_six_ba, 2, round, 1)
+```
+
+And here are tips
+
+```{r table-six-c}
+# tips
+tips <- filter(bone_data, Morphtype == "T")
+table_six_c <- tips %>%
+  group_by(PHASE) %>%
+  summarise(`mean length` =  mean(Length),
+            `mean width` =  mean(Max..Width),
+            `mean thickness` =  mean(Max..Depth),
+            `mean tip length` =  mean(Tip.Length)
+            )
+rownames(table_six_c) <- as.character(table_six_c[, 1])
+table_six_c <- table_six_c[,-1]
+table_six_c <- data.frame(t(table_six_c))
+apply(table_six_c, 2, round, 1)
+
+table_six_ca <- tips %>%
+  group_by(PHASE) %>%
+  summarise(`sd length` =  sd(Length),
+            `sd width` =  sd(Max..Width, na.rm = TRUE),
+            `sd thickness` =  sd(Max..Depth, na.rm = TRUE),
+            `sd tip length` =  sd(Tip.Length, na.rm = TRUE),
+            count = length(Length)
+            )
+rownames(table_six_ca) <- as.character(table_six_ca[, 1])
+table_six_ca <- table_six_ca[,-1]
+table_six_ca <- data.frame(t(table_six_ca))
+apply(table_six_ca, 2, round, 1)
+```
+
+Table 7. Use of manufacturing techniques for all points and point fragments through the chronological sequence. Sc = scraping; G = grinding; Sh = shaving. Combinations indicate sequence of use of methods; i.e. Sc+G = scraped then ground.
+
+```{r table-seven}
+table_seven <- bone_data %>%
+  group_by(PHASE, Manufact.method) %>%
+  summarise(count = length(Manufact.method))
+table_seven <- recast(table_seven, PHASE ~ Manufact.method, sum)
+phases <- table_seven$PHASE
+rownames(table_seven) <- phases
+table_seven[,2:ncol(table_seven)]  <- sapply(table_seven[,2:ncol(table_seven)], as.numeric)
+table_seven <- table_seven[,-1]
+
+
+# simplify the table to match what's in the manuscript
+SL <- rowSums(select(table_seven, SL))
+G  <- rowSums(select(table_seven, GO, GI, GL, GT, `GO/`))
+C  <- rowSums(select(table_seven, C))
+SL_C <- (table_seven[, grep("SL/C$", colnames(table_seven))])
+SL_G <- rowSums(table_seven[, grep("SL/G.$", colnames(table_seven))])
+C_G <- (table_seven[, grep("C/G", colnames(table_seven))])
+SL_C_G <- (table_seven[, grep("SL/C/G", colnames(table_seven))])
+I <- rowSums(select(table_seven, I))
+table_seven <- data.frame(SL, G, C, SL_G, SL_C, C_G, SL_C_G, I)
+table_seven <- rbind(table_seven, colSums(table_seven), round(colSums(table_seven)/sum(colSums(table_seven))*100,0))
+rownames(table_seven) <- c(phases, "totals", "percentages")
+colnames(table_seven) <- c('Sc', 'G', 'Sh', 'Sc+G', 'Sc+Sh', 'Sh+G', 'Sc+Sh+G', 'Indet')
+table_seven
+```
+
+Approximately 50% of the entire Walandawe sample of points and point fragments show evidence of a single manufacturing method (Table 7). This is most often scraping (`r table_seven$Sc[nrow(table_seven)]`%), followed by grinding (`r table_seven$G[nrow(table_seven)]`%), with exclusive use of shaving being a rare occurrence (`r table_seven$Sh[nrow(table_seven)]`%). Use of two or more techniques on a single point is commonly observed, with scraping followed by grinding (`r table_seven$'Sc+G'[nrow(table_seven)]`%) being the most commonly observed sequence of applications. Scraping followed by shaving alone or followed by shaving and grinding are similarly uncommon at `r table_seven$'Sc+Sh'[nrow(table_seven)]`% and `r table_seven$'Sc+Sh+G'[nrow(table_seven)]`% of points, and shaving followed by grinding is also uncommon (`r table_seven$'Sh+G'[nrow(table_seven)]`%).
+
+
+Figure 22. Proportional use of principal manufacturing techniques and their combinations through the chronological sequence (Phase A to E).
+
+```{r figure-twenty-two}
+table_seven <- table_seven[c(-nrow(table_seven), -(nrow(table_seven)-1)),-ncol(table_seven)]
+table_seven$phase <- phases
+fig_twenty_two <- melt(table_seven)
+ggplot(fig_twenty_two, aes(phase, value, fill = variable)) + 
+  geom_bar(position = 'fill', stat = 'identity') +
+  theme_minimal(base_size = base_size) +
+  coord_flip() +
+  scale_x_discrete(limits = rev(levels(as.factor(fig_twenty_two$phase)) ))
+
+ggplot(fig_twenty_two, aes(variable, value)) + 
+  geom_bar( stat = 'identity') +
+  theme_minimal(base_size = 12) +
+  facet_grid(phase ~ .) +
+  xlab("Manufacturing technique")
+```
+
+Table 8. Inclusive use of manufacturing techniques for all points and point fragments through the chronological sequence, e.g. Incl Sc = manufacture includes scraping. 
+
+Comment: 
+
+* counts are slightly different from the ms. but the interpretation is the same
+
+```{r table-eight}
+table_eight <- bone_data %>%
+  group_by(PHASE, Manufact.method) %>%
+  summarise(count = length(Manufact.method))
+table_eight <- recast(table_eight, PHASE ~ Manufact.method, sum)
+phases <- table_eight$PHASE
+rownames(table_eight) <- phases
+table_seven[,2:ncol(table_eight)]  <- sapply(table_eight[,2:ncol(table_eight)], as.numeric)
+table_eight <- table_eight[,-1]
+
+
+# simplify the table to match what's in the manuscript
+SL <- rowSums(table_eight[, grep("^SL", colnames(table_eight))])
+G  <- rowSums(table_eight[, grep("^G", colnames(table_eight))])
+C  <- rowSums(table_eight[, grep("^C", colnames(table_eight))])
+
+table_eight <- data.frame(SL, G, C)
+table_eight <- rbind(table_eight, colSums(table_eight), round(colSums(table_eight)/sum(colSums(table_eight))*100,0))
+rownames(table_eight) <- c(phases, "totals", "percentages")
+table_eight$totals <- rowSums(table_eight)
+colnames(table_eight) <- c('Sc', 'G', 'Sh', 'totals')
+table_eight
+
+```
+
+
+
+Figure 23. Manufacturing method used to produce each of the better represented classes of points.
+
+Comment: 
+
+* It's not clear how to get the 'uni- bi-point categories from the data, in this case the 'dentine uni-bi-point' and 'cortex uni-bi-point'
+
+```{r figure-twenty-three}
+
+bone_data$morph_rawmat <- with(bone_data, paste(Morphtype, `Raw Material`, sep = "_"))
+figure_twenty_three  <- bone_data %>%
+  group_by(morph_rawmat , Manufact.method, Morphtype) %>%
+  summarise(count = length(Manufact.method)) %>%
+  filter(Morphtype %in% c("U", "B", "S"))
+figure_twenty_three <- recast(figure_twenty_three, morph_rawmat ~ Manufact.method, sum)
+ morph_rawmat <- figure_twenty_three$morph_rawmat 
+
+SL <- rowSums(select(figure_twenty_three, SL))
+G  <- figure_twenty_three[, grep("^G.{1}$", colnames(figure_twenty_three))]
+# C  <- rowSums(select(figure_twenty_three, C))
+SL_C <- (figure_twenty_three[, grep("SL/C$", colnames(figure_twenty_three))])
+SL_G <- rowSums(figure_twenty_three[, grep("SL/G.$", colnames(figure_twenty_three))])
+SL_C_G <- (figure_twenty_three[, grep("SL/C/G", colnames(figure_twenty_three))])
+figure_twenty_three <- data.frame(SL, G, SL_G, SL_C,  SL_C_G)
+colnames(figure_twenty_three) <- c('Sc', 'G',  'Sc+G', 'Sc+Sh', 'Sc+Sh+G')
+
+figure_twenty_three$morph_rawmat <-  morph_rawmat
+figure_twenty_three <- melt(figure_twenty_three)
+
+ggplot(figure_twenty_three, aes(morph_rawmat, value, fill = variable)) + 
+  geom_bar(position = 'fill', stat = 'identity') +
+  theme_minimal(base_size = base_size) +
+  coord_flip() +
+  scale_x_discrete(limits = rev(levels(as.factor(figure_twenty_three$morph_rawmat)) ))
+
+ggplot(figure_twenty_three, aes(variable, value)) + 
+  geom_bar( stat = 'identity') +
+  theme_minimal(base_size = 12) +
+  facet_grid(morph_rawmat ~ .) +
+  xlab("Manufacturing technique")
+
+```
+
+Figure 24. Graph of manufacturing methods by size of artefacts.  All point fragments – manufacturing size classes.
+
+
+Comment: 
+
+* substantially the same, but note that my size classes are evenly sizes and the ones in. the ms. are not, which is bad. 
+
+```{r figure-twenty-four}
+bone_data$size_range <-      with(bone_data, 
+                              ifelse(Length  < 10, "<10",
+                              ifelse(Length  > 10 & Length  < 15 , "10-15",
+                              ifelse(Length  > 15 & Length  < 20 , "15-20",
+                              ifelse(Length  > 20 & Length  < 25 , "20-25",
+                              ifelse(Length  > 25 & Length  < 30 , "25-30",
+                              ifelse(Length  > 30, ">30",
+                                     "no_data")))))))
+
+# simplify the table to match what's in the manuscript
+SL <- (bone_data[grep("^SL$", bone_data$Manufact.method), ])$size_range
+G  <- (bone_data[grep("^G.$", bone_data$Manufact.method), ])$size_range
+C  <- (bone_data[grep("^C$", bone_data$Manufact.method), ])$size_range
+SL_C <- (bone_data[grep("^SL/C$", bone_data$Manufact.method), ])$size_range
+SL_G <- (bone_data[grep("^SL/G.$", bone_data$Manufact.method), ])$size_range
+C_G <- (bone_data[grep("^C/G.$", bone_data$Manufact.method), ])$size_range
+SL_C_G <- (bone_data[grep("^SL/C/G.$", bone_data$Manufact.method), ])$size_range
+
+# combine these into a data frame to plot
+fig_twenty_four <- stack(list(SL=SL, G=G, C=C, SL_C=SL_C, SL_G=SL_G, C_G=C_G, SL_C_G=SL_C_G))
+# remove missing values
+`%ni%` <- Negate(`%in%`)
+fig_twenty_four  <- filter(fig_twenty_four, values %ni% c("NA", NA, "no_data"), ind %ni% c("<NA>", "no_data"))
+
+# make ordered factor for plotting
+fig_twenty_four$values <- ordered(fig_twenty_four$values, levels = (c("<10", "10-15", "15-20", "20-25", "25-30", ">30")))
+fig_twenty_four$`manufacturing method` <- fig_twenty_four$ind
+
+ggplot(fig_twenty_four, aes(values, fill = `manufacturing method`)) +
+   geom_histogram(position = 'fill') +
+  theme_minimal(base_size = base_size) +
+  coord_flip() + 
+  scale_x_discrete(limits = rev(levels(as.factor(fig_twenty_four$values )) )) +
+  xlab("size class (mm)") +
+  ylab("proportion")
+
+ggplot(fig_twenty_four, aes(values)) + 
+  geom_histogram() +
+  theme_minimal(base_size = 12) +
+  facet_grid(ind ~ .) +
+  xlab("Size class")
+
+```
+
+Table 9. Occurrence of use-wear types among the various morphotypes and point fragments (primary end of bipoints). Included types are LP = light polish; HP = heavy polish; FS = fine striations; CS = coarse striations. PE = primary end of bipoint; SE = secondary end of bipoint.
+
+Comment: 
+
+* This table is very difficult to reproduce. My version is pretty close, and the interpreation is the same.
+
+* The main problem seems to be that multiple variables have been concatenated into one, specifically multiple types of usewear into one column, when they should have a column for each unique type.
+
+* The table in the ms. has two rows of 'cortex bipoint PE', presumably one should be 'cortex bipoint SE'
+
+
+```{r table-nine}
+# make some new variables for the table
+bone_data$PE <- with(bone_data, ifelse(Tip.Use.Wear.PE != "", "PE", ""))
+bone_data$SE <- with(bone_data, ifelse(Tip.UW.SE != "", "SE", ""))
+bone_data$any_uw <- with(bone_data, ifelse(Tip.UW.SE != "", 1, 
+                                    ifelse(Tip.Use.Wear.PE != "", 1, 0)))
+
+bone_data$rawmat_morphtype <- with(bone_data, 
+ ifelse(Morphtype == "B" & Raw.Mat. == "C", "Cortex_bipoint",  
+ ifelse(Morphtype == "B" & Raw.Mat. == "D", "Dentin_bipoint",
+ ifelse(Morphtype == "U" & Raw.Mat. == "C", "Cortex_unipoint",
+ ifelse(Morphtype == "U" & Raw.Mat. == "D", "Dentin_unipoint",
+ ifelse(Morphtype == "U" & Raw.Mat. == "S", "Shaft_unipoint",  
+ ifelse(Morphtype == "T" & Raw.Mat. == "C", "Cortex_tip", 
+ ifelse(Morphtype == "T" & Raw.Mat. == "D", "Dentin_tip",
+ # ifelse(Morphtype == "F" & Raw.Mat. == "C", "Cortex_fragment",
+ # ifelse(Morphtype == "F" & Raw.Mat. == "D", "Dentin_fragment",
+        "no_data"  ))))))))
+
+
+# table has:
+# none  incl. LP	incl. HP	incl. FS	incl. CS
+# just get the first usewear type when there are multiple
+
+# separate primary and secondary ends
+PE <- filter(bone_data, PE == "PE")
+SE <- filter(bone_data, SE == "SE")
+NE <- filter(bone_data, PE == "")
+# recode so we have same use-wear codes per end
+PE$E_UW_LP  <- ifelse(grepl("L", PE$Tip.Use.Wear.PE), 1, 0)
+SE$E_UW_LP  <- ifelse(grepl("L", SE$Tip.UW.SE), 1, 0)
+
+PE$E_UW_HP  <- ifelse(grepl("H", PE$Tip.Use.Wear.PE), 1, 0)
+SE$E_UW_HP  <- ifelse(grepl("H", SE$Tip.UW.SE), 1, 0)
+
+PE$E_UW_FS  <- ifelse(grepl("F", PE$Tip.Use.Wear.PE), 1, 0)
+SE$E_UW_FS  <- ifelse(grepl("F", SE$Tip.UW.SE), 1, 0)
+
+PE$E_UW_CS  <- ifelse(grepl("C", PE$Tip.Use.Wear.PE), 1, 0)
+SE$E_UW_CS  <- ifelse(grepl("C", SE$Tip.UW.SE), 1, 0)
+
+PE$E_UW_N  <- ifelse(grepl("N", PE$Tip.Use.Wear.PE), 1, 0)
+SE$E_UW_N  <- ifelse(grepl("N", SE$Tip.UW.SE), 1, 0)
+
+# re-combine the two ends into one big table
+both_ends_uw <- rbind(PE, SE)
+
+both_ends_uw$end <- c(rep("PE", nrow(PE)), 
+                 rep("SE", nrow(SE)))
+
+table_nine <- both_ends_uw %>%
+ group_by(rawmat_morphtype, end ) %>%
+ summarise(E.incl.LP = sum(E_UW_LP),
+           E.incl.HP = sum(E_UW_HP),
+           E.incl.FS = sum(E_UW_FS),
+           E.incl.CS = sum(E_UW_CS),
+           None = sum(E_UW_N),
+           Total = sum(E_UW_LP, E_UW_HP, E_UW_FS, E_UW_CS, E_UW_N)
+           )
+table_nine
+
+```
+
+Table 10. Occurrence of use-related damage among the various morphotypes and point fragments. PE = primary end of bipoint; SE = secondary end of bipoint.
+
+Comment: 
+
+* Basically the same.
+
+
+```{r table-ten}
+# C = crushing; T = transverse snap; S = step fracture; I = indeterminate; u = undamaged
+
+# recode so we have same use-wear codes per end
+PE$E_D_C  <- ifelse(grepl("C", PE$Tip.damage.PE), 1, 0)
+SE$E_D_C  <- ifelse(grepl("C", SE$Tip.dam..SE), 1, 0)
+NE$E_D_C  <- NA
+
+PE$E_D_T  <- ifelse(grepl("T", PE$Tip.damage.PE), 1, 0)
+SE$E_D_T  <- ifelse(grepl("T", SE$Tip.dam..SE), 1, 0)
+NE$E_D_T  <- NA
+
+PE$E_D_S  <- ifelse(grepl("^S", PE$Tip.damage.PE), 1, 0)
+SE$E_D_S  <- ifelse(grepl("^S", SE$Tip.dam..SE), 1, 0)
+NE$E_D_S  <- NA
+
+PE$E_D_TS  <- ifelse(grepl("TS", PE$Tip.damage.PE), 1, 0)
+SE$E_D_TS  <- ifelse(grepl("TS", SE$Tip.dam..SE), 1, 0)
+NE$E_D_TS  <- NA
+
+PE$E_D_N  <- ifelse(PE$Tip.damage.PE == "", 1, 0)
+SE$E_D_N  <- ifelse(SE$Tip.dam..SE == "", 1, 0)
+NE$E_D_N  <- NA
+
+both_ends <- rbind(PE, SE)
+
+# join to 'no ends' and pad out NE dataframe because it doesn't have the same amount of columns
+rbind.all.columns <- function(x, y) {
+ 
+    x.diff <- setdiff(colnames(x), colnames(y))
+    y.diff <- setdiff(colnames(y), colnames(x))
+ 
+    x[, c(as.character(y.diff))] <- NA
+ 
+    y[, c(as.character(x.diff))] <- NA
+ 
+    return(rbind(x, y))
+}
+
+both_ends <- rbind.all.columns(both_ends, NE)
+
+
+both_ends$end <- c(rep("PE", nrow(PE)), 
+                 rep("SE", nrow(SE)),
+                 rep("", nrow(NE)))
+both_ends$none <- c(rep(0, nrow(PE)), 
+                    rep(0, nrow(SE)),
+                    rep(1, nrow(NE)))
+
+table_ten <- both_ends %>%
+ group_by(rawmat_morphtype, end ) %>%
+ summarise(crush = sum(E_D_C),
+           snap = sum(E_D_T),
+           step = sum(E_D_S),
+           step_crush = sum(E_D_TS),
+           None = sum(none),
+           Total = sum(E_D_C, E_D_T, E_D_TS, none)
+           )
+table_ten
+
+```
+
+
+
+Figure 28. Relative frequency of occurrence of various kinds of use-wear on points made from cortex bone slivers and dentin.
+
+Comment: 
+
+* substantially the same, I've used less classes to make it clearer to read.
+
+```{r figure-twenty-eight}
+
+figure_twenty_eight <-
+  both_ends_uw %>%
+  filter(Raw.Mat. %in% c("C", "D")) %>%
+  select(`Raw Material`, `Low polish` = E_UW_LP, `High polish` = E_UW_HP, `Fine striations` = E_UW_FS, `Coarse striations` = E_UW_CS, None = E_UW_N)
+
+figure_twenty_eight <- melt(figure_twenty_eight)
+
+figure_twenty_eight$`use wear` <- figure_twenty_eight$variable
+
+ggplot(figure_twenty_eight, aes(`Raw Material`, value, fill = `use wear`)) +
+   geom_histogram(position = 'fill', stat = "identity") +
+  theme_minimal(base_size = base_size) +
+  coord_flip() + 
+  ylab("proportion")
+
+ggplot(figure_twenty_eight, aes(`Raw Material`, value)) + 
+  geom_histogram(stat = 'identity') +
+  theme_minimal(base_size = 12) +
+  facet_grid(variable ~ .) 
+  
+```
+
+Figure 29. Relative occurrence of use-related wear on artefact tips in each of the chronological intervals.
+
+```{r figure-twenty-nine}
+figure_twenty_nine <-
+  both_ends_uw %>% # use both ends of the points
+  select(PHASE, `Low polish` = E_UW_LP, `High polish` = E_UW_HP, `Fine striations` = E_UW_FS, `Coarse striations` = E_UW_CS, None = E_UW_N)
+
+figure_twenty_nine <- melt(figure_twenty_nine)
+
+figure_twenty_nine$`use wear`  <- figure_twenty_nine$variable
+
+ggplot(figure_twenty_nine, aes(PHASE, value, fill = `use wear`)) +
+   geom_histogram(position = 'fill', stat = "identity") +
+  theme_minimal(base_size = base_size) +
+  coord_flip() + 
+  ylab("proportion") + 
+  scale_x_discrete(limits = rev(levels(as.factor(figure_twenty_nine$PHASE )) ))
+
+ggplot(figure_twenty_nine, aes(PHASE, value)) + 
+  geom_histogram(stat = 'identity') +
+  theme_minimal(base_size = 12) +
+  facet_grid(variable ~ .) 
+
+# percentage from Phase E that have use wear?
+E_none <- nrow(filter(figure_twenty_nine, PHASE == "E", `use wear` == "None", value == 1))
+E_all <- nrow(filter(figure_twenty_nine, PHASE == "E", value == 1))
+E_none_perc <- 100 - round(E_none / E_all * 100, 1)
+
+# percentage from phase A that have heavy polish 
+A_HP <- nrow(filter(figure_twenty_nine, PHASE == "A", `use wear` == "High polish", value == 1))
+A_all <- nrow(filter(figure_twenty_nine, PHASE == "A", value == 1))
+A_HP_perc <- round(A_HP / A_all * 100, 1)
+
+# percentage from phase C that have heavy polish 
+C_HP <- nrow(filter(figure_twenty_nine, PHASE == "C", `use wear` == "High polish", value == 1))
+C_all <- nrow(filter(figure_twenty_nine, PHASE == "C", value == 1))
+C_HP_perc <- round(C_HP / C_all * 100, 1)
+
+```
+
+Chronological trends in the frequency and kind of use-related wear to the tips of points is illustrated in Figure 29. The most pronounced contrast is seen between the oldest and the youngest samples. The oldest sample, from Phase E, shows a low rate of wear overall (only `r E_none_perc`% show any obvious use wear) and a predominance of light wear, whereas in the youngest sample (Phase A) every attached tip has use wear and on `r A_HP_perc`% of these a heavy polish is present, with or without striations. Samples from intervening time periods (Phases B to D) are intermediate in overall levels of wear and the intensity of wear.
+
+Comment: 
+
+* phase C also has a high proportion of high polish - `r C_HP_perc`%
+
+
+Figure 30. Use-related wear on the mid-shaft region of points from each of the chronological intervals.
+
+Comment: 
+
+* the temproal trend is less evident in my plot compared to the ms. This is probably due to our slightly different selection or points in each phase (I'm simply filtering the data table, it's not clear how it was done in the ms)
+
+```{r figure-thirty}
+
+# recode so we have same use-wear codes for the shaft
+bone_data$S_UW_LP  <- ifelse(grepl("L", bone_data$Shaft.UW), 1, 0)
+bone_data$S_UW_HP  <- ifelse(grepl("H", bone_data$Shaft.UW), 1, 0)
+bone_data$S_UW_S  <- ifelse(grepl("C", bone_data$Shaft.UW), 1, 0)
+bone_data$S_UW_F  <- ifelse(grepl("F", bone_data$Shaft.UW), 1, 0)
+bone_data$S_UW_N  <- ifelse(grepl("N", bone_data$Shaft.UW), 1, 0)
+
+figure_thirty <-
+  bone_data %>% # use both ends of the points
+  select(PHASE, `Low polish` = S_UW_LP, `High polish` = S_UW_HP, striations = S_UW_S, None = S_UW_N)
+
+figure_thirty <- melt(figure_thirty)
+
+figure_thirty$`use wear`  <- figure_thirty$variable
+
+ggplot(figure_thirty, aes(PHASE, value, fill = `use wear`)) +
+   geom_histogram(position = 'fill', stat = "identity") +
+  theme_minimal(base_size = base_size) +
+  coord_flip() + 
+  ylab("proportion") + 
+  scale_x_discrete(limits = rev(levels(as.factor(figure_thirty$PHASE )) ))
+
+ggplot(figure_thirty, aes(PHASE, value)) + 
+  geom_histogram(stat = 'identity') +
+  theme_minimal(base_size = 12) +
+  facet_grid(variable ~ .) 
+
+# percentage from phase A that have heavy polish 
+A_HP <- nrow(filter(figure_thirty, PHASE == "A", `use wear` == "High polish", value == 1))
+A_all <- nrow(filter(figure_thirty, PHASE == "A", value == 1))
+A_HP_perc <- round(A_HP / A_all * 100, 1)
+
+```
+
+Use wear on the mid-shaft is also more frequent in Phase A than in earlier periods (Figure 30) but this seems to be the result of a more gradual trend through the chronological sequence. A more abrupt change is observed in the intensity of wear, with high polish present on `r A_HP_perc`% of mid-shafts in Phase A, compared with rare examples prior to that time.
+
+
+Figure 31. Relative frequency of occurrence of the major osseous artefact morphotypes through the chronostratigraphic sequence.
+
+Comment: 
+
+* the figure in the ms. appears to be a mix of morphotypes and raw materials, is tusk the same as dentine?
+
+
+```{r figure-thirty-one}
+figure_thirty_one <- bone_data %>%
+  select(PHASE, Morphotype) %>%
+  group_by(PHASE, Morphotype) %>%
+  summarise(length(Morphotype))
+
+figure_thirty_one <- melt(figure_thirty_one)
+
+
+ggplot(figure_thirty_one, aes(PHASE, value, fill = Morphotype)) +
+   geom_histogram(position = 'fill', stat = 'identity') +
+  theme_minimal(base_size = base_size) +   
+  coord_flip() + 
+  ylab("proportion") + 
+  scale_x_discrete(limits = rev(levels(as.factor(figure_thirty_one$PHASE )) ))
+
+ggplot(figure_thirty_one, aes(PHASE, value)) + 
+  geom_histogram(stat = 'identity') +
+  theme_minimal(base_size = 12) +
+  facet_grid(Morphotype ~ .) 
+
+```
+
+
+Figure 32. Comparison of cross-sectional dimensions of unipoints from the Walandawe and Niah Cave assemblages.
+
+Figure 33. Comparison of cross-sectional dimensions all points (uni- and bi-points) from three geographic regions – Walandawe area of Sulawesi, the Niah Caves are of northwest Borneo, and the Aru Islands of eastern Indonesia.
+
+Comment: 
+
+* I can't replicate figs 32 and 33 as I don't have access to Harrisson and Medway 1962. The Barton et al. 2009 paper only has L and W data, not Th.
+
+Tables 11-13. I don't have the raw data from the Kria Cave, North Moluccan and Aru Islands. If you can send them to me that would be great.
+
+
+```{r flattening}
+ggplot(bipoint_unipoint, aes(Max..Width, W.D.ratio, colour = Morphotype)) +
+  geom_point(size = 4) +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_minimal(base_size = base_size) +
+  ggtitle("Bipoints and Unipoints: Width/WTh ratio") +
+  xlab("Width (mm)") +
+  ylab("Width/Thickness ratio") 
+
+# are the regression line slopes different?
+m1a <- aov( Max..Width ~ W.D.ratio * Morphotype, data = bipoint_unipoint)
+m2a <- aov( Max..Width ~ W.D.ratio + Morphotype, data = bipoint_unipoint)
+pval_slopes <- anova(m1a, m2a)$`Pr(>F)`[2]
+# we fail to reject the null hypothesis of equal slopes in these data
+```
+
+Now looking at David Bulbeck's contingency tables.
+
+```{r tables_raw-materials}
+# raw material by phase
+raw_mat_tab <- dcast(`Raw Material` ~ PHASE, data = bone_data)
+raw_mat_tab 
+raw_mat_tab_subset <- rbind(raw_mat_tab[raw_mat_tab$`Raw Material` == 'cortex',], c('`other`', unname(colSums(raw_mat_tab[!raw_mat_tab$`Raw Material` %in% c('cortex'), 2:ncol(raw_mat_tab)]))))
+# make numeric
+raw_mat_tab_subset[,2:ncol(raw_mat_tab_subset)] <- data.frame(apply(raw_mat_tab_subset[2:ncol(raw_mat_tab_subset)], 2, as.numeric))
+# phase A-D by E
+`A-D` <- rowSums(raw_mat_tab_subset[,c('A', 'B', 'C', 'D')])
+raw_mat_phase_A_to_D_by_E <- data.frame(`A-D`= `A-D`, E = raw_mat_tab_subset$E)
+raw_mat_phase_A_to_D_by_E
+# significance test
+fisher.test(raw_mat_phase_A_to_D_by_E)
+```
+
+
+```{r table-morph-type-expedient}
+morph_tab <- dcast(Morphotype ~ PHASE, data = bone_data)
+morph_tab 
+
+# but isn't the same as DB's
+
+# BD's row names
+# Expedient
+# Fragment
+# Tip
+# Ground piece
+# Preforms
+# Spatula
+# Bipoint
+# Indeterminate
+# 
+# KA's data key
+# X B = bipoint; 
+# X E = expedient (used but otherwise unmodified); 
+# X F = fragment; 
+# X G = ground piece; 
+# S = shaft frag; 
+# X Sp = spatula; 
+# X T = tip of point; 
+# U = unipoint 
+# X Spr and Pr - possible preforms
+
+# so DB has combined like so:
+# fragment = shaft fragment + fragment
+# indeterminate = unipoint
+
+
+# expedient by other determinate
+morph_tab_subset <- rbind(morph_tab[morph_tab$Morphotype == 'expedient',], c('`other determinate`', unname(colSums(morph_tab[!morph_tab$Morphotype %in% c('expedient', 'unipoint'), 2:ncol(morph_tab)]))))
+# make numeric
+morph_tab_subset[,2:ncol(morph_tab_subset)] <- data.frame(apply(morph_tab_subset[2:ncol(morph_tab_subset)], 2, as.numeric))
+`A-B` <- unname(rowSums(morph_tab_subset[,c('A', 'B')]))
+`C-E` <- unname(rowSums(morph_tab_subset[,c('C', 'D', 'E')]))
+moph_phase_AB_to_CE <- data.frame(`A-B` = `A-B`, `C-E` = `C-E`  )
+moph_phase_AB_to_CE
+fisher.test(moph_phase_AB_to_CE)
+```
+
+```{r table-morph-type-bipoint}
+
+# bipoint by other determinate
+morph_tab_subset <- rbind(morph_tab[morph_tab$Morphotype == 'bipoint',], c('`other determinate`', unname(colSums(morph_tab[!morph_tab$Morphotype %in% c('bipoint', 'unipoint'), 2:ncol(morph_tab)]))))
+# make numeric
+morph_tab_subset[,2:ncol(morph_tab_subset)] <- data.frame(apply(morph_tab_subset[2:ncol(morph_tab_subset)], 2, as.numeric))
+`A` <- as.numeric(unname(morph_tab_subset[,c('A')]))
+`B-E` <- unname(rowSums(morph_tab_subset[,c('B', 'C', 'D', 'E')]))
+moph_phase_A_to_BE <- data.frame(`A` = `A`, `B-E` = `B-E`  )
+moph_phase_A_to_BE
+fisher.test(moph_phase_A_to_BE)
+
+```
+
+```{r table-morph-type-ground}
+
+# ground by other determinate
+morph_tab_subset <- rbind(morph_tab[morph_tab$Morphotype == 'ground piece',], c('`other determinate`', unname(colSums(morph_tab[!morph_tab$Morphotype %in% c('ground piece', 'unipoint'), 2:ncol(morph_tab)]))))
+# make numeric
+morph_tab_subset[,2:ncol(morph_tab_subset)] <- data.frame(apply(morph_tab_subset[2:ncol(morph_tab_subset)], 2, as.numeric))
+`A` <- as.numeric(unname(morph_tab_subset[,c('A')]))
+`B-E` <- unname(rowSums(morph_tab_subset[,c('B', 'C', 'D', 'E')]))
+moph_phase_A_to_BE <- data.frame(`A` = `A`, `B-E` = `B-E`  )
+moph_phase_A_to_BE
+fisher.test(moph_phase_A_to_BE)
+
+```
+
+```{r table-morph-type-spatula}
+
+# spatula by other determinate
+morph_tab_subset <- rbind(morph_tab[morph_tab$Morphotype == 'spatula',], c('`other determinate`', unname(colSums(morph_tab[!morph_tab$Morphotype %in% c('spatula', 'unipoint'), 2:ncol(morph_tab)]))))
+# make numeric
+morph_tab_subset[,2:ncol(morph_tab_subset)] <- data.frame(apply(morph_tab_subset[2:ncol(morph_tab_subset)], 2, as.numeric))
+`E` <- as.numeric(unname(morph_tab_subset[,c('E')]))
+`A-D` <- unname(rowSums(morph_tab_subset[,c('B', 'C', 'D', 'A')]))
+moph_phase_AD_to_E <- data.frame(`A-D` = `A-D`, `E` = `E`  )
+moph_phase_AD_to_E
+fisher.test(moph_phase_AD_to_E)
+
+```
+
+
+```{r table-manf-tech-scrape}
+manf_tab <- dcast(Manufact.method ~ PHASE, data = bone_data)
+manf_tab
+
+# DB has the following: 
+# Scraping = SL
+# Grinding/Polishing  = G.
+# Shaving  = C
+# Scraping & Grinding = SL/G.
+# Scraping & Shaving = SL/C
+# Shaving & Grinding = C/G.
+# Scraping, Shaving & Grinding = SL/C/G.
+# None/indeterminate = I or N
+
+# KA has
+# C = shaving; 
+# SL = scraping longitudinal; 
+# GL = grinding longit; 
+# GT = grinding transverse; 
+# GO = grinding oblique; 
+# GI = grinding indeterminate; 
+# I = indeterminate; 
+# N = none
+
+Scraping <- colSums(manf_tab[grepl("SL", manf_tab$Manufact.method),2:ncol(manf_tab)])
+other_determinate <- manf_tab[!grepl("SL", manf_tab$Manufact.method),]
+other_determinate <- other_determinate[!(other_determinate$Manufact.method %in% c('I', 'U', 'N', '')), ]
+other_determinate <- colSums(other_determinate[,2:ncol(other_determinate)])
+scape <- rbind(Scraping, other_determinate)
+`A-B` <- unname(rowSums(scape[,c('B', 'A')]))
+`C-E` <- unname(rowSums(scape[,c('C', 'D', 'E')]))
+scape <-  data.frame(`A-B` = `A-B`, `C-E` = `C-E`  )
+scape
+fisher.test(scape)
+
+```
+
+
+```{r table-manf-tech-grinding}
+grind <- colSums(manf_tab[grepl("G", manf_tab$Manufact.method),2:ncol(manf_tab)])
+other_determinate <- manf_tab[!grepl("G", manf_tab$Manufact.method),]
+other_determinate <- other_determinate[!(other_determinate$Manufact.method %in% c('I', 'U', 'N', '')), ]
+
+other_determinate <- colSums(other_determinate[,2:ncol(other_determinate)])
+grind <- rbind(grind, other_determinate)
+`A-B` <- unname(rowSums(grind[,c('B', 'A')]))
+`B-E` <- unname(rowSums(grind[,c('B', 'C', 'D')]))
+`C-D` <- unname(rowSums(grind[,c('C', 'D')]))
+`C-E` <- unname(rowSums(grind[,c('C', 'D', 'E')]))
+E <- as.numeric(unname(grind[,c('E')]))
+A <- as.numeric(unname(grind[,c('A')]))
+grind <-  data.frame( `A-B` = `A-B`, `C-D` = `C-D` )
+grind
+chisq.test(grind)
+chisq.test(grind)
+grind <-  data.frame( `C-D` = `C-D`, E = E )
+grind
+chisq.test(grind)
+grind <-  data.frame( `A-B` = `A-B`, `C-D` = `C-D`, E = E )
+grind
+chisq.test(grind)
+
+```
+
+
+```{r table-manf-tech-shave}
+
+
+# including shaving
+shave <- colSums(manf_tab[grepl("C", manf_tab$Manufact.method),2:ncol(manf_tab)])
+other_determinate <- manf_tab[!grepl("C", manf_tab$Manufact.method),]
+other_determinate <- other_determinate[!(other_determinate$Manufact.method %in% c('I', 'U', 'N', '')), ]
+other_determinate <- colSums(other_determinate[,2:ncol(other_determinate)])
+shave <- rbind(shave, other_determinate)
+`A-B` <- unname(rowSums(shave[,c('B', 'A')]))
+`B-E` <- unname(rowSums(shave[,c('B', 'C', 'D', 'E')]))
+`C-D` <- unname(rowSums(shave[,c('C', 'D')]))
+`C-E` <- unname(rowSums(shave[,c('C', 'D', 'E')]))
+E <- as.numeric(unname(shave[,c('E')]))
+A <- as.numeric(unname(shave[,c('A')]))
+shave <-  data.frame(`A-B` = `A-B`, `C-E` = `C-E`)
+shave
+fisher.test(shave)
+
+# shaving only
+shave <- colSums(manf_tab[grepl("^C$", manf_tab$Manufact.method),2:ncol(manf_tab)])
+non_shave <- manf_tab[!grepl("^C$", manf_tab$Manufact.method),]
+non_shave <- non_shave[!(non_shave$Manufact.method %in% c('I', 'U', 'N', '')), ]
+shave <- rbind(shave, colSums(non_shave[,2:ncol(non_shave)]))
+A <- as.numeric(unname(shave[,c('A')]))
+`B-E` <- unname(rowSums(shave[,c('B', 'C', 'D', 'E')]))
+shave <-  data.frame(A = A, `B-E` = `B-E` )
+shave
+fisher.test(shave)
+
+# DB has is like so
+df <- matrix(c(2,  0, 14,	125), ncol= 2, byrow = TRUE)
+fisher.test(df)
+
+```
+

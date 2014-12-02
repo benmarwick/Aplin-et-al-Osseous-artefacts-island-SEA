@@ -1,0 +1,32 @@
+Key to codes used in Aplin-et-al-Osseous-artefacts-island-SEA data (prepared by Ken Aplin)
+					
+					
+Morphtype: B = bipoint; E = expedient (used but otherwise unmodified); F = fragment; G = ground piece; S = shaft frag; Sp = spatula; T = tip of point; U = unipoint (ignore Spr and Pr - possible preforms)	
+					
+Breakage: A = during or after excavation; B = old break; N = complete; U = uncertain	
+					
+Bipoint condition: C = complete; 1 = one tip missing; 2 = both tips missing	
+					
+Raw mat.: C = cortex bone splinter; D = dentine; S = long bone shaft	
+					
+Burning Overall: U = unburnt; B = burnt; C = calcined	
+					
+Focal Burn: N = no; Y = yes	
+					
+Manufact method: C = shaving; SL = scraping longitudinal; GL = grinding longit; GT = grinding transverse; GO = grinding oblique; GI = grinding indeterminate; I = indeterminate; N = none	
+
+					
+Tip Shape primary end: these describe X-section near tip	
+					
+Tip damage PE: C = crushing; T = transverse snap; S = step fracture; I = indeterminate; u = undamaged	
+					
+Tip Use Wear PE: ch = chipping of enamel rim; C0= coarse oblique striae; CT = coarse transverse striae; F = fine oblique striae; F = fine transverse striae; LP = light polish; HP = high polish; I = indeterminate; N = unworn	
+					
+these describe X-section near tip	
+					
+Tip damage SE: C = crushing; T = transverse snap; S = step fracture; I = indeterminate; u = undamaged		
+					
+					CO = coarse oblique striae; CT = coarse transverse striae; F = fine oblique striae; F = fine transverse striae; LP = light polish; HP = high polish; I = indeterminate; N = unworn								
+					
+					
+

@@ -1,0 +1,365 @@
+PackratFormat: 1.3
+PackratVersion: 0.3.0
+RVersion: 3.0.3
+Repos: CRAN=http://cran.rstudio.com,
+    CRANextra=http://www.stats.ox.ac.uk/pub/RWin,
+    BioCsoft=http://bioconductor.org/packages/2.12/bioc,
+    BioCann=http://bioconductor.org/packages/2.12/data/annotation,
+    BioCexp=http://bioconductor.org/packages/2.12/data/experiment,
+    BioCextra=http://bioconductor.org/packages/2.12/extra
+
+Package: abind
+Source: CRAN
+Version: 1.4-0
+
+Package: assertthat
+Source: CRAN
+Version: 0.1
+
+Package: bcp
+Source: CRAN
+Version: 3.0.1
+Requires: foreach, iterators, Rcpp
+
+Package: BEST
+Source: CRAN
+Version: 0.2.2
+Requires: coda, rjags
+
+Package: BH
+Source: CRAN
+Version: 1.54.0-2
+
+Package: bitops
+Source: CRAN
+Version: 1.0-6
+
+Package: coda
+Source: CRAN
+Version: 0.16-1
+
+Package: colorspace
+Source: CRAN
+Version: 1.2-4
+
+Package: data.table
+Source: CRAN
+Version: 1.9.2
+Requires: reshape2
+
+Package: DBI
+Source: CRAN
+Version: 0.2-7
+
+Package: devtools
+Source: CRAN
+Version: 1.5
+Requires: digest, evaluate, httr, memoise, RCurl, whisker
+
+Package: dichromat
+Source: CRAN
+Version: 2.0-0
+
+Package: digest
+Source: CRAN
+Version: 0.6.4
+
+Package: DNAcopy
+Source: Bioconductor
+Version: 1.34.0
+
+Package: dplyr
+Source: CRAN
+Version: 0.2
+Requires: assertthat, BH, hflights, Lahman, magrittr, Rcpp
+
+Package: EBImage
+Source: Bioconductor
+Version: 4.2.1
+Requires: abind, jpeg, locfit, png, tiff
+
+Package: evaluate
+Source: CRAN
+Version: 0.5.5
+Requires: stringr
+
+Package: foreach
+Source: CRAN
+Version: 1.4.2
+Requires: iterators
+
+Package: formatR
+Source: CRAN
+Version: 0.10
+
+Package: Formula
+Source: CRAN
+Version: 1.1-1
+
+Package: ggplot2
+Source: CRAN
+Version: 1.0.0
+Requires: digest, gtable, plyr, proto, reshape2, scales
+
+Package: gridExtra
+Source: CRAN
+Version: 0.9.1
+
+Package: gtable
+Source: CRAN
+Version: 0.1.2
+
+Package: hexbin
+Source: CRAN
+Version: 1.26.3
+
+Package: hflights
+Source: CRAN
+Version: 0.1
+
+Package: highr
+Source: CRAN
+Version: 0.3
+
+Package: Hmisc
+Source: CRAN
+Version: 3.14-4
+Requires: Formula, latticeExtra
+
+Package: htmltools
+Source: CRAN
+Version: 0.2.4
+Requires: digest
+
+Package: httr
+Source: CRAN
+Version: 0.3
+Requires: digest, RCurl, stringr
+
+Package: iterators
+Source: CRAN
+Version: 1.0.7
+
+Package: jpeg
+Source: CRAN
+Version: 0.1-8
+
+Package: knitr
+Source: CRAN
+Version: 1.6
+Requires: digest, evaluate, formatR, highr, markdown, stringr
+
+Package: labeling
+Source: CRAN
+Version: 0.2
+
+Package: Lahman
+Source: CRAN
+Version: 2.0-3
+
+Package: latticeExtra
+Source: CRAN
+Version: 0.6-26
+Requires: RColorBrewer
+
+Package: locfit
+Source: CRAN
+Version: 1.5-9.1
+
+Package: magrittr
+Source: CRAN
+Version: 1.0.1
+
+Package: mapproj
+Source: CRAN
+Version: 1.2-2
+Requires: maps
+
+Package: maps
+Source: CRAN
+Version: 2.3-7
+
+Package: maptools
+Source: CRAN
+Version: 0.8-30
+Requires: sp
+
+Package: markdown
+Source: CRAN
+Version: 0.7
+Requires: mime
+
+Package: MCMCpack
+Source: CRAN
+Version: 1.3-3
+Requires: coda
+
+Package: memoise
+Source: CRAN
+Version: 0.2.1
+Requires: digest
+
+Package: microbenchmark
+Source: CRAN
+Version: 1.3-0
+
+Package: mime
+Source: CRAN
+Version: 0.1.1
+
+Package: MonetDB.R
+Source: CRAN
+Version: 0.9.2
+Requires: DBI, digest
+
+Package: multcomp
+Source: CRAN
+Version: 1.3-3
+Requires: mvtnorm, sandwich, TH.data
+
+Package: munsell
+Source: CRAN
+Version: 0.4.2
+Requires: colorspace
+
+Package: mvtnorm
+Source: CRAN
+Version: 0.9-99992
+
+Package: packrat
+Source: github
+Version: 0.3.0
+GithubRepo: packrat
+GithubUsername: rstudio
+GithubRef: master
+GithubSha1: 2165ec14e9f2ecb9e94cbde9a00d76da578ea47c
+
+Package: pixmap
+Source: CRAN
+Version: 0.4-11
+
+Package: plyr
+Source: CRAN
+Version: 1.8.1
+Requires: Rcpp
+
+Package: png
+Source: CRAN
+Version: 0.1-7
+
+Package: proto
+Source: CRAN
+Version: 0.3-10
+
+Package: quantreg
+Source: CRAN
+Version: 5.05
+Requires: SparseM
+
+Package: RColorBrewer
+Source: CRAN
+Version: 1.0-5
+
+Package: Rcpp
+Source: CRAN
+Version: 0.11.2
+
+Package: RCurl
+Source: CRAN
+Version: 1.95-4.1
+Requires: bitops
+
+Package: reshape2
+Source: CRAN
+Version: 1.4
+Requires: plyr, Rcpp, stringr
+
+Package: RGraphics
+Source: CRAN
+Version: 2.0-9
+Requires: ggplot2
+
+Package: rjags
+Source: CRAN
+Version: 3-13
+Requires: coda
+
+Package: rmarkdown
+Source: github
+Version: 0.2.49
+Requires: htmltools, knitr, yaml
+GithubRepo: rmarkdown
+GithubUsername: rstudio
+GithubRef: master
+GithubSha1: 047a80058bb4ef0b142196013d1c4dd8870d4dd9
+
+Package: RPostgreSQL
+Source: CRAN
+Version: 0.4
+Requires: DBI
+
+Package: RSQLite
+Source: CRAN
+Version: 0.11.4
+Requires: DBI
+
+Package: RSQLite.extfuns
+Source: CRAN
+Version: 0.0.1
+Requires: RSQLite
+
+Package: sandwich
+Source: CRAN
+Version: 2.3-0
+Requires: zoo
+
+Package: scales
+Source: CRAN
+Version: 0.2.4
+Requires: dichromat, labeling, munsell, plyr, RColorBrewer
+
+Package: sp
+Source: CRAN
+Version: 1.0-15
+
+Package: SparseM
+Source: CRAN
+Version: 1.03
+
+Package: stringr
+Source: CRAN
+Version: 0.6.2
+
+Package: strucchange
+Source: CRAN
+Version: 1.5-0
+Requires: sandwich, zoo
+
+Package: testthat
+Source: CRAN
+Version: 0.8.1
+Requires: digest
+
+Package: TH.data
+Source: CRAN
+Version: 1.0-3
+
+Package: tiff
+Source: CRAN
+Version: 0.1-5
+
+Package: whisker
+Source: CRAN
+Version: 0.3-2
+
+Package: XML
+Source: CRAN
+Version: 3.98-1.1
+
+Package: yaml
+Source: CRAN
+Version: 2.1.13
+
+Package: zoo
+Source: CRAN
+Version: 1.7-11
